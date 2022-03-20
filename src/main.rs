@@ -1,27 +1,29 @@
 use std::io;
 
-// enum Mark {
-//     circle, cross
-// }
+#[derive(PartialEq)]
+#[derive(Debug)]
+enum Mark {
+    circle, cross
+}
 
 
 
-fn determine_mark(mark: &str) -> String {
+fn determine_mark(mark: &str) -> Result<Mark, &'static str> {
     if mark == String::from("○") {
-        String::from("○")
+        Ok(Mark::circle)
     } else if mark == "×"{
-        String::from("×")
+        Ok(Mark::cross)
     } else {
-        String::new()
+        Err("Invalid Input")
     }
 }
 
 #[test]
 fn determine_mark_test() {
-    assert_eq!(determine_mark("○"), "○");
-    assert_eq!(determine_mark("×"), "×");
-    assert_eq!(determine_mark("a"), "");
-    assert_eq!(determine_mark(""), "");
+    assert_eq!(determine_mark("○"), Ok(Mark::circle));
+    assert_eq!(determine_mark("×"), Ok(Mark::cross));
+    assert_eq!(determine_mark("a"), Err("Invalid Input"));
+    assert_eq!(determine_mark(""), Err("Invalid Input"));
 }
 
 fn main() {
@@ -31,10 +33,10 @@ fn main() {
         .expect("Failed to read line");
 
     let mark = determine_mark(input.trim());
-    if mark == "" {
-        println!("Invalid Input")
+    if mark.is_ok() {
+        println!("Valid Mark")
     } else {
-        println!("{}", mark)
+        println!("Invalid Input")
     }
 }
 
