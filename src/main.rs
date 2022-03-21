@@ -15,9 +15,9 @@ struct MarkCount {
 }
 
 fn determine_mark(mark: &str) -> Result<Mark, &'static str> {
-    if mark == String::from("○") {
+    if mark == String::from("o") {
         Ok(Mark::Circle)
-    } else if mark == "×" {
+    } else if mark == "x" {
         Ok(Mark::Cross)
     } else {
         Err("Invalid Input")
@@ -32,18 +32,35 @@ fn calculate_mark_count(mark_count: MarkCount, mark: Mark) -> MarkCount {
     }
 }
 
-fn count_continuous_mark(input: String) -> Result<MarkCount, &'static str> {
+fn get_continuous_mark(input: String) -> Result<Option<Mark>, &'static str> {
+    if input.len() >= 6 {
+        return Err("Too Many Marks")
+    }
     let mut mark_count: MarkCount = MarkCount { mark: Mark::Circle, count: 0 };
     for char in input.as_str().chars() {
         let mark = determine_mark(&char.to_string());
         match mark {
-            Ok(mark) => mark_count = calculate_mark_count(mark_count, mark),
+            Ok(mark) => {
+                mark_count = calculate_mark_count(mark_count, mark);
+                if mark_count.count >= 3 {
+                    return Ok(Some(mark_count.mark))
+                }
+            },
             Err(str) => {
                 return Err(str);
             }
         }
     }
-    Ok(mark_count)
+    Ok(None)
+}
+
+fn get_game_result(input: String) -> Result<&'static str, &'static str> {
+    match get_continuous_mark(input.trim().to_string()) {
+        Ok(Some(Mark::Circle)) => Ok("o"),
+        Ok(Some(Mark::Cross)) => Ok("x"),
+        Ok(None) => Ok("draw"),
+        Err(str) => Err(str)
+    }
 }
 
 fn main() {
@@ -52,21 +69,17 @@ fn main() {
         .read_line(&mut input)
         .expect("Failed to read line");
 
-    for i in input.as_str().chars() {
-        println!("{}", i.to_string())
-    }
-    let mark = determine_mark(input.trim());
-    if mark.is_ok() {
-        println!("Valid Mark")
-    } else {
-        println!("Invalid Input")
+    let result = get_game_result(input);
+    match result {
+        Ok(res) => println!("{}", res),
+        Err(str) => println!("{}", str),
     }
 }
 
 #[test]
 fn determine_mark_test() {
-    assert_eq!(determine_mark("○"), Ok(Mark::Circle));
-    assert_eq!(determine_mark("×"), Ok(Mark::Cross));
+    assert_eq!(determine_mark("o"), Ok(Mark::Circle));
+    assert_eq!(determine_mark("x"), Ok(Mark::Cross));
     assert_eq!(determine_mark("a"), Err("Invalid Input"));
     assert_eq!(determine_mark(""), Err("Invalid Input"));
 }
@@ -98,8 +111,17 @@ fn calculate_mark_count_test() {
 
 #[test]
 fn count_continuous_mark_test() {
-    assert_eq!(count_continuous_mark(String::from("○○○○")), Ok(MarkCount { mark: Mark::Circle, count: 4 }));
-    assert_eq!(count_continuous_mark(String::from("××××")), Ok(MarkCount { mark: Mark::Cross, count: 4 }));
-    assert_eq!(count_continuous_mark(String::from("×○××")), Ok(MarkCount { mark: Mark::Cross, count: 2 }));
-    assert_eq!(count_continuous_mark(String::from("×○a○")), Err("Invalid Input"));
+    assert_eq!(get_continuous_mark(String::from("oooo")), Ok(Some(Mark::Circle)));
+    assert_eq!(get_continuous_mark(String::from("xxxx")), Ok(Some(Mark::Cross)));
+    assert_eq!(get_continuous_mark(String::from("xoxx")), Ok(None));
+    assert_eq!(get_continuous_mark(String::from("xoao")), Err("Invalid Input"));
+}
+
+#[test]
+fn get_game_result_test() {
+    assert_eq!(get_game_result(String::from("xooox")), Ok("o"));
+    assert_eq!(get_game_result(String::from("xxxxx")), Ok("x"));
+    assert_eq!(get_game_result(String::from("xoxxo")), Ok("draw"));
+    assert_eq!(get_game_result(String::from("xoxxox")), Err("Too Many Marks"));
+    assert_eq!(get_game_result(String::from("xoxxy")), Err("Invalid Input"));
 }
