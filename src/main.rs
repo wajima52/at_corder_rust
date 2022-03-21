@@ -32,15 +32,19 @@ fn calculate_mark_count(mark_count: MarkCount, mark: Mark) -> MarkCount {
     }
 }
 
-// fn count_continuous_mark(input: String) -> Option<MarkCount> {
-//     let mut mark_count: MarkCount;
-//     for char in input.as_str().chars() {
-//         let mark = determine_mark(&char.to_string());
-//         match mark {
-//             Mark::circle => MarkCount{}
-//         }
-//     }
-// }
+fn count_continuous_mark(input: String) -> Result<MarkCount, &'static str> {
+    let mut mark_count: MarkCount = MarkCount { mark: Mark::Circle, count: 0 };
+    for char in input.as_str().chars() {
+        let mark = determine_mark(&char.to_string());
+        match mark {
+            Ok(mark) => mark_count = calculate_mark_count(mark_count, mark),
+            Err(str) => {
+                return Err(str);
+            }
+        }
+    }
+    Ok(mark_count)
+}
 
 fn main() {
     let mut input = String::new();
@@ -92,9 +96,10 @@ fn calculate_mark_count_test() {
     );
 }
 
-// #[test]
-// fn count_continuous_mark_test() {
-//     assert_eq!(count_continuous_mark(String::from("○○○")), MarkCount { mark: Mark::circle, count: 3 });
-//     assert_eq!(count_continuous_mark(String::from("×××")), MarkCount { mark: Mark::cross, count: 3 });
-//     assert_eq!(count_continuous_mark(String::from("×○×")), MarkCount { mark: Mark::cross, count: 1 });
-// }
+#[test]
+fn count_continuous_mark_test() {
+    assert_eq!(count_continuous_mark(String::from("○○○○")), Ok(MarkCount { mark: Mark::Circle, count: 4 }));
+    assert_eq!(count_continuous_mark(String::from("××××")), Ok(MarkCount { mark: Mark::Cross, count: 4 }));
+    assert_eq!(count_continuous_mark(String::from("×○××")), Ok(MarkCount { mark: Mark::Cross, count: 2 }));
+    assert_eq!(count_continuous_mark(String::from("×○a○")), Err("Invalid Input"));
+}
