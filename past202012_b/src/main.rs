@@ -1,5 +1,15 @@
+use std::io;
+
 fn main() {
-    println!("Hello, world!");
+    let mut input = String::new();
+    io::stdin()
+        .read_line(&mut input)
+        .expect("Failed to read line");
+    let initial_input = input.clone();
+    for char in initial_input.chars() {
+        input = add_character_after_remove_same(input, &char.to_string());
+    }
+    print!("{}", input);
 }
 
 
