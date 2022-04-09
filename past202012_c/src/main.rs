@@ -1,5 +1,16 @@
+use std::io;
+
 fn main() {
-    println!("Hello, world!");
+    let mut input = String::new();
+    io::stdin()
+        .read_line(&mut input)
+        .expect("Failed to read line");
+
+    let result = base_conversion(input.trim().parse::<u32>().unwrap(), 36);
+    match result {
+        Ok(res) => println!("{}", res),
+        Err(str) => println!("{}", str),
+    }
 }
 
 
