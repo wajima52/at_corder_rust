@@ -33,6 +33,11 @@ fn get_strings_to_positional_notation(base_number: &u8) -> Result<Vec<char>, &'s
     }
 }
 
+/*
+進数変換をする関数
+number: 変換前の値
+base_number: X進法のXの数値
+ */
 fn base_conversion(number: u32, base_number: u8) -> Result<String, &'static str> {
     let mut number = number;
     let notation = get_strings_to_positional_notation(&base_number);
